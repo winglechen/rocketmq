@@ -93,7 +93,13 @@ public class SendMessageProcessorTest {
 
     @Test
     public void testProcessRequest() throws RemotingCommandException {
-        when(messageStore.putMessage(any(MessageExtBrokerInner.class))).thenReturn(new PutMessageResult(PutMessageStatus.PUT_OK, new AppendMessageResult(AppendMessageStatus.PUT_OK)));
+        when(
+           messageStore.putMessage(
+               any(MessageExtBrokerInner.class)
+           )
+        ).thenReturn(
+           new PutMessageResult(PutMessageStatus.PUT_OK, new AppendMessageResult(AppendMessageStatus.PUT_OK))
+        );
         assertPutResult(ResponseCode.SUCCESS);
     }
 

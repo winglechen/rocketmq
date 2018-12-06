@@ -203,22 +203,6 @@ public class BrokerController {
         );
     }
 
-    public BrokerConfig getBrokerConfig() {
-        return brokerConfig;
-    }
-
-    public NettyServerConfig getNettyServerConfig() {
-        return nettyServerConfig;
-    }
-
-    public BlockingQueue<Runnable> getPullThreadPoolQueue() {
-        return pullThreadPoolQueue;
-    }
-
-    public BlockingQueue<Runnable> getQueryThreadPoolQueue() {
-        return queryThreadPoolQueue;
-    }
-
     public boolean initialize() throws CloneNotSupportedException {
         boolean result = this.topicConfigManager.load();
 
@@ -229,8 +213,8 @@ public class BrokerController {
         if (result) {
             try {
                 this.messageStore =
-                    new DefaultMessageStore(this.messageStoreConfig, this.brokerStatsManager, this.messageArrivingListener,
-                        this.brokerConfig);
+                        new DefaultMessageStore(this.messageStoreConfig, this.brokerStatsManager, this.messageArrivingListener,
+                                this.brokerConfig);
                 this.brokerStats = new BrokerStats((DefaultMessageStore) this.messageStore);
                 //load plugin
                 MessageStorePluginContext context = new MessageStorePluginContext(messageStoreConfig, brokerStatsManager, messageArrivingListener, brokerConfig);
@@ -250,60 +234,60 @@ public class BrokerController {
             fastConfig.setListenPort(nettyServerConfig.getListenPort() - 2);
             this.fastRemotingServer = new NettyRemotingServer(fastConfig, this.clientHousekeepingService);
             this.sendMessageExecutor = new BrokerFixedThreadPoolExecutor(
-                this.brokerConfig.getSendMessageThreadPoolNums(),
-                this.brokerConfig.getSendMessageThreadPoolNums(),
-                1000 * 60,
-                TimeUnit.MILLISECONDS,
-                this.sendThreadPoolQueue,
-                new ThreadFactoryImpl("SendMessageThread_"));
+                    this.brokerConfig.getSendMessageThreadPoolNums(),
+                    this.brokerConfig.getSendMessageThreadPoolNums(),
+                    1000 * 60,
+                    TimeUnit.MILLISECONDS,
+                    this.sendThreadPoolQueue,
+                    new ThreadFactoryImpl("SendMessageThread_"));
 
             this.pullMessageExecutor = new BrokerFixedThreadPoolExecutor(
-                this.brokerConfig.getPullMessageThreadPoolNums(),
-                this.brokerConfig.getPullMessageThreadPoolNums(),
-                1000 * 60,
-                TimeUnit.MILLISECONDS,
-                this.pullThreadPoolQueue,
-                new ThreadFactoryImpl("PullMessageThread_"));
+                    this.brokerConfig.getPullMessageThreadPoolNums(),
+                    this.brokerConfig.getPullMessageThreadPoolNums(),
+                    1000 * 60,
+                    TimeUnit.MILLISECONDS,
+                    this.pullThreadPoolQueue,
+                    new ThreadFactoryImpl("PullMessageThread_"));
 
             this.queryMessageExecutor = new BrokerFixedThreadPoolExecutor(
-                this.brokerConfig.getQueryMessageThreadPoolNums(),
-                this.brokerConfig.getQueryMessageThreadPoolNums(),
-                1000 * 60,
-                TimeUnit.MILLISECONDS,
-                this.queryThreadPoolQueue,
-                new ThreadFactoryImpl("QueryMessageThread_"));
+                    this.brokerConfig.getQueryMessageThreadPoolNums(),
+                    this.brokerConfig.getQueryMessageThreadPoolNums(),
+                    1000 * 60,
+                    TimeUnit.MILLISECONDS,
+                    this.queryThreadPoolQueue,
+                    new ThreadFactoryImpl("QueryMessageThread_"));
 
             this.adminBrokerExecutor =
-                Executors.newFixedThreadPool(this.brokerConfig.getAdminBrokerThreadPoolNums(), new ThreadFactoryImpl(
-                    "AdminBrokerThread_"));
+                    Executors.newFixedThreadPool(this.brokerConfig.getAdminBrokerThreadPoolNums(), new ThreadFactoryImpl(
+                            "AdminBrokerThread_"));
 
             this.clientManageExecutor = new ThreadPoolExecutor(
-                this.brokerConfig.getClientManageThreadPoolNums(),
-                this.brokerConfig.getClientManageThreadPoolNums(),
-                1000 * 60,
-                TimeUnit.MILLISECONDS,
-                this.clientManagerThreadPoolQueue,
-                new ThreadFactoryImpl("ClientManageThread_"));
+                    this.brokerConfig.getClientManageThreadPoolNums(),
+                    this.brokerConfig.getClientManageThreadPoolNums(),
+                    1000 * 60,
+                    TimeUnit.MILLISECONDS,
+                    this.clientManagerThreadPoolQueue,
+                    new ThreadFactoryImpl("ClientManageThread_"));
 
             this.heartbeatExecutor = new BrokerFixedThreadPoolExecutor(
-                this.brokerConfig.getHeartbeatThreadPoolNums(),
-                this.brokerConfig.getHeartbeatThreadPoolNums(),
-                1000 * 60,
-                TimeUnit.MILLISECONDS,
-                this.heartbeatThreadPoolQueue,
-                new ThreadFactoryImpl("HeartbeatThread_", true));
+                    this.brokerConfig.getHeartbeatThreadPoolNums(),
+                    this.brokerConfig.getHeartbeatThreadPoolNums(),
+                    1000 * 60,
+                    TimeUnit.MILLISECONDS,
+                    this.heartbeatThreadPoolQueue,
+                    new ThreadFactoryImpl("HeartbeatThread_", true));
 
             this.endTransactionExecutor = new BrokerFixedThreadPoolExecutor(
-                this.brokerConfig.getEndTransactionThreadPoolNums(),
-                this.brokerConfig.getEndTransactionThreadPoolNums(),
-                1000 * 60,
-                TimeUnit.MILLISECONDS,
-                this.endTransactionThreadPoolQueue,
-                new ThreadFactoryImpl("EndTransactionThread_"));
+                    this.brokerConfig.getEndTransactionThreadPoolNums(),
+                    this.brokerConfig.getEndTransactionThreadPoolNums(),
+                    1000 * 60,
+                    TimeUnit.MILLISECONDS,
+                    this.endTransactionThreadPoolQueue,
+                    new ThreadFactoryImpl("EndTransactionThread_"));
 
             this.consumerManageExecutor =
-                Executors.newFixedThreadPool(this.brokerConfig.getConsumerManageThreadPoolNums(), new ThreadFactoryImpl(
-                    "ConsumerManageThread_"));
+                    Executors.newFixedThreadPool(this.brokerConfig.getConsumerManageThreadPoolNums(), new ThreadFactoryImpl(
+                            "ConsumerManageThread_"));
 
             this.registerProcessor();
 
@@ -430,38 +414,38 @@ public class BrokerController {
                 // Register a listener to reload SslContext
                 try {
                     fileWatchService = new FileWatchService(
-                        new String[] {
-                            TlsSystemConfig.tlsServerCertPath,
-                            TlsSystemConfig.tlsServerKeyPath,
-                            TlsSystemConfig.tlsServerTrustCertPath
-                        },
-                        new FileWatchService.Listener() {
-                            boolean certChanged, keyChanged = false;
+                            new String[] {
+                                    TlsSystemConfig.tlsServerCertPath,
+                                    TlsSystemConfig.tlsServerKeyPath,
+                                    TlsSystemConfig.tlsServerTrustCertPath
+                            },
+                            new FileWatchService.Listener() {
+                                boolean certChanged, keyChanged = false;
 
-                            @Override
-                            public void onChanged(String path) {
-                                if (path.equals(TlsSystemConfig.tlsServerTrustCertPath)) {
-                                    log.info("The trust certificate changed, reload the ssl context");
-                                    reloadServerSslContext();
+                                @Override
+                                public void onChanged(String path) {
+                                    if (path.equals(TlsSystemConfig.tlsServerTrustCertPath)) {
+                                        log.info("The trust certificate changed, reload the ssl context");
+                                        reloadServerSslContext();
+                                    }
+                                    if (path.equals(TlsSystemConfig.tlsServerCertPath)) {
+                                        certChanged = true;
+                                    }
+                                    if (path.equals(TlsSystemConfig.tlsServerKeyPath)) {
+                                        keyChanged = true;
+                                    }
+                                    if (certChanged && keyChanged) {
+                                        log.info("The certificate and private key changed, reload the ssl context");
+                                        certChanged = keyChanged = false;
+                                        reloadServerSslContext();
+                                    }
                                 }
-                                if (path.equals(TlsSystemConfig.tlsServerCertPath)) {
-                                    certChanged = true;
-                                }
-                                if (path.equals(TlsSystemConfig.tlsServerKeyPath)) {
-                                    keyChanged = true;
-                                }
-                                if (certChanged && keyChanged) {
-                                    log.info("The certificate and private key changed, reload the ssl context");
-                                    certChanged = keyChanged = false;
-                                    reloadServerSslContext();
-                                }
-                            }
 
-                            private void reloadServerSslContext() {
-                                ((NettyRemotingServer) remotingServer).loadSslContext();
-                                ((NettyRemotingServer) fastRemotingServer).loadSslContext();
-                            }
-                        });
+                                private void reloadServerSslContext() {
+                                    ((NettyRemotingServer) remotingServer).loadSslContext();
+                                    ((NettyRemotingServer) fastRemotingServer).loadSslContext();
+                                }
+                            });
                 } catch (Exception e) {
                     log.warn("FileWatchService created error, can't load the certificate dynamically");
                 }
@@ -471,206 +455,67 @@ public class BrokerController {
         return result;
     }
 
-    private void initialTransaction() {
-        this.transactionalMessageService = ServiceProvider.loadClass(ServiceProvider.TRANSACTION_SERVICE_ID, TransactionalMessageService.class);
-        if (null == this.transactionalMessageService) {
-            this.transactionalMessageService = new TransactionalMessageServiceImpl(new TransactionalMessageBridge(this, this.getMessageStore()));
-            log.warn("Load default transaction message hook service: {}", TransactionalMessageServiceImpl.class.getSimpleName());
+    public void start() throws Exception {
+        if (this.messageStore != null) {
+            this.messageStore.start();
         }
-        this.transactionalMessageCheckListener = ServiceProvider.loadClass(ServiceProvider.TRANSACTION_LISTENER_ID, AbstractTransactionalMessageCheckListener.class);
-        if (null == this.transactionalMessageCheckListener) {
-            this.transactionalMessageCheckListener = new DefaultTransactionalMessageCheckListener();
-            log.warn("Load default discard message hook service: {}", DefaultTransactionalMessageCheckListener.class.getSimpleName());
+
+        if (this.remotingServer != null) {
+            this.remotingServer.start();
         }
-        this.transactionalMessageCheckListener.setBrokerController(this);
-        this.transactionalMessageCheckService = new TransactionalMessageCheckService(this);
-    }
 
-    public void registerProcessor() {
-        /**
-         * SendMessageProcessor
-         */
-        SendMessageProcessor sendProcessor = new SendMessageProcessor(this);
-        sendProcessor.registerSendMessageHook(sendMessageHookList);
-        sendProcessor.registerConsumeMessageHook(consumeMessageHookList);
+        if (this.fastRemotingServer != null) {
+            this.fastRemotingServer.start();
+        }
 
-        this.remotingServer.registerProcessor(RequestCode.SEND_MESSAGE, sendProcessor, this.sendMessageExecutor);
-        this.remotingServer.registerProcessor(RequestCode.SEND_MESSAGE_V2, sendProcessor, this.sendMessageExecutor);
-        this.remotingServer.registerProcessor(RequestCode.SEND_BATCH_MESSAGE, sendProcessor, this.sendMessageExecutor);
-        this.remotingServer.registerProcessor(RequestCode.CONSUMER_SEND_MSG_BACK, sendProcessor, this.sendMessageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.SEND_MESSAGE, sendProcessor, this.sendMessageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.SEND_MESSAGE_V2, sendProcessor, this.sendMessageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.SEND_BATCH_MESSAGE, sendProcessor, this.sendMessageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.CONSUMER_SEND_MSG_BACK, sendProcessor, this.sendMessageExecutor);
-        /**
-         * PullMessageProcessor
-         */
-        this.remotingServer.registerProcessor(RequestCode.PULL_MESSAGE, this.pullMessageProcessor, this.pullMessageExecutor);
-        this.pullMessageProcessor.registerConsumeMessageHook(consumeMessageHookList);
+        if (this.fileWatchService != null) {
+            this.fileWatchService.start();
+        }
 
-        /**
-         * QueryMessageProcessor
-         */
-        NettyRequestProcessor queryProcessor = new QueryMessageProcessor(this);
-        this.remotingServer.registerProcessor(RequestCode.QUERY_MESSAGE, queryProcessor, this.queryMessageExecutor);
-        this.remotingServer.registerProcessor(RequestCode.VIEW_MESSAGE_BY_ID, queryProcessor, this.queryMessageExecutor);
+        if (this.brokerOuterAPI != null) {
+            this.brokerOuterAPI.start();
+        }
 
-        this.fastRemotingServer.registerProcessor(RequestCode.QUERY_MESSAGE, queryProcessor, this.queryMessageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.VIEW_MESSAGE_BY_ID, queryProcessor, this.queryMessageExecutor);
+        if (this.pullRequestHoldService != null) {
+            this.pullRequestHoldService.start();
+        }
 
-        /**
-         * ClientManageProcessor
-         */
-        ClientManageProcessor clientProcessor = new ClientManageProcessor(this);
-        this.remotingServer.registerProcessor(RequestCode.HEART_BEAT, clientProcessor, this.heartbeatExecutor);
-        this.remotingServer.registerProcessor(RequestCode.UNREGISTER_CLIENT, clientProcessor, this.clientManageExecutor);
-        this.remotingServer.registerProcessor(RequestCode.CHECK_CLIENT_CONFIG, clientProcessor, this.clientManageExecutor);
+        if (this.clientHousekeepingService != null) {
+            this.clientHousekeepingService.start();
+        }
 
-        this.fastRemotingServer.registerProcessor(RequestCode.HEART_BEAT, clientProcessor, this.heartbeatExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.UNREGISTER_CLIENT, clientProcessor, this.clientManageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.CHECK_CLIENT_CONFIG, clientProcessor, this.clientManageExecutor);
+        if (this.filterServerManager != null) {
+            this.filterServerManager.start();
+        }
 
-        /**
-         * ConsumerManageProcessor
-         */
-        ConsumerManageProcessor consumerManageProcessor = new ConsumerManageProcessor(this);
-        this.remotingServer.registerProcessor(RequestCode.GET_CONSUMER_LIST_BY_GROUP, consumerManageProcessor, this.consumerManageExecutor);
-        this.remotingServer.registerProcessor(RequestCode.UPDATE_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
-        this.remotingServer.registerProcessor(RequestCode.QUERY_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
+        this.registerBrokerAll(true, false, true);
 
-        this.fastRemotingServer.registerProcessor(RequestCode.GET_CONSUMER_LIST_BY_GROUP, consumerManageProcessor, this.consumerManageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.UPDATE_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.QUERY_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
-        /**
-         * EndTransactionProcessor
-         */
-        this.remotingServer.registerProcessor(RequestCode.END_TRANSACTION, new EndTransactionProcessor(this), this.endTransactionExecutor);
-        this.fastRemotingServer.registerProcessor(RequestCode.END_TRANSACTION, new EndTransactionProcessor(this), this.endTransactionExecutor);
-
-        /**
-         * Default
-         */
-        AdminBrokerProcessor adminProcessor = new AdminBrokerProcessor(this);
-        this.remotingServer.registerDefaultProcessor(adminProcessor, this.adminBrokerExecutor);
-        this.fastRemotingServer.registerDefaultProcessor(adminProcessor, this.adminBrokerExecutor);
-    }
-
-    public BrokerStats getBrokerStats() {
-        return brokerStats;
-    }
-
-    public void setBrokerStats(BrokerStats brokerStats) {
-        this.brokerStats = brokerStats;
-    }
-
-    public void protectBroker() {
-        if (this.brokerConfig.isDisableConsumeIfConsumerReadSlowly()) {
-            final Iterator<Map.Entry<String, MomentStatsItem>> it = this.brokerStatsManager.getMomentStatsItemSetFallSize().getStatsItemTable().entrySet().iterator();
-            while (it.hasNext()) {
-                final Map.Entry<String, MomentStatsItem> next = it.next();
-                final long fallBehindBytes = next.getValue().getValue().get();
-                if (fallBehindBytes > this.brokerConfig.getConsumerFallbehindThreshold()) {
-                    final String[] split = next.getValue().getStatsKey().split("@");
-                    final String group = split[2];
-                    LOG_PROTECTION.info("[PROTECT_BROKER] the consumer[{}] consume slowly, {} bytes, disable it", group, fallBehindBytes);
-                    this.subscriptionGroupManager.disableConsume(group);
+            @Override
+            public void run() {
+                try {
+                    BrokerController.this.registerBrokerAll(true, false, brokerConfig.isForceRegister());
+                } catch (Throwable e) {
+                    log.error("registerBrokerAll Exception", e);
                 }
             }
-        }
-    }
+        }, 1000 * 10, Math.max(10000, Math.min(brokerConfig.getRegisterNameServerPeriod(), 60000)), TimeUnit.MILLISECONDS);
 
-    public long headSlowTimeMills(BlockingQueue<Runnable> q) {
-        long slowTimeMills = 0;
-        final Runnable peek = q.peek();
-        if (peek != null) {
-            RequestTask rt = BrokerFastFailure.castRunnable(peek);
-            slowTimeMills = rt == null ? 0 : this.messageStore.now() - rt.getCreateTimestamp();
+        if (this.brokerStatsManager != null) {
+            this.brokerStatsManager.start();
         }
 
-        if (slowTimeMills < 0) {
-            slowTimeMills = 0;
+        if (this.brokerFastFailure != null) {
+            this.brokerFastFailure.start();
         }
 
-        return slowTimeMills;
-    }
-
-    public long headSlowTimeMills4SendThreadPoolQueue() {
-        return this.headSlowTimeMills(this.sendThreadPoolQueue);
-    }
-
-    public long headSlowTimeMills4PullThreadPoolQueue() {
-        return this.headSlowTimeMills(this.pullThreadPoolQueue);
-    }
-
-    public long headSlowTimeMills4QueryThreadPoolQueue() {
-        return this.headSlowTimeMills(this.queryThreadPoolQueue);
-    }
-
-    public long headSlowTimeMills4EndTransactionThreadPoolQueue() {
-        return this.headSlowTimeMills(this.endTransactionThreadPoolQueue);
-    }
-
-    public void printWaterMark() {
-        LOG_WATER_MARK.info("[WATERMARK] Send Queue Size: {} SlowTimeMills: {}", this.sendThreadPoolQueue.size(), headSlowTimeMills4SendThreadPoolQueue());
-        LOG_WATER_MARK.info("[WATERMARK] Pull Queue Size: {} SlowTimeMills: {}", this.pullThreadPoolQueue.size(), headSlowTimeMills4PullThreadPoolQueue());
-        LOG_WATER_MARK.info("[WATERMARK] Query Queue Size: {} SlowTimeMills: {}", this.queryThreadPoolQueue.size(), headSlowTimeMills4QueryThreadPoolQueue());
-        LOG_WATER_MARK.info("[WATERMARK] Transaction Queue Size: {} SlowTimeMills: {}", this.endTransactionThreadPoolQueue.size(), headSlowTimeMills4EndTransactionThreadPoolQueue());
-    }
-
-    public MessageStore getMessageStore() {
-        return messageStore;
-    }
-
-    public void setMessageStore(MessageStore messageStore) {
-        this.messageStore = messageStore;
-    }
-
-    private void printMasterAndSlaveDiff() {
-        long diff = this.messageStore.slaveFallBehindMuch();
-
-        // XXX: warn and notify me
-        log.info("Slave fall behind master: {} bytes", diff);
-    }
-
-    public Broker2Client getBroker2Client() {
-        return broker2Client;
-    }
-
-    public ConsumerManager getConsumerManager() {
-        return consumerManager;
-    }
-
-    public ConsumerFilterManager getConsumerFilterManager() {
-        return consumerFilterManager;
-    }
-
-    public ConsumerOffsetManager getConsumerOffsetManager() {
-        return consumerOffsetManager;
-    }
-
-    public MessageStoreConfig getMessageStoreConfig() {
-        return messageStoreConfig;
-    }
-
-    public ProducerManager getProducerManager() {
-        return producerManager;
-    }
-
-    public void setFastRemotingServer(RemotingServer fastRemotingServer) {
-        this.fastRemotingServer = fastRemotingServer;
-    }
-
-    public PullMessageProcessor getPullMessageProcessor() {
-        return pullMessageProcessor;
-    }
-
-    public PullRequestHoldService getPullRequestHoldService() {
-        return pullRequestHoldService;
-    }
-
-    public SubscriptionGroupManager getSubscriptionGroupManager() {
-        return subscriptionGroupManager;
+        if (BrokerRole.SLAVE != messageStoreConfig.getBrokerRole()) {
+            if (this.transactionalMessageCheckService != null) {
+                log.info("Start transaction service!");
+                this.transactionalMessageCheckService.start();
+            }
+        }
     }
 
     public void shutdown() {
@@ -764,79 +609,16 @@ public class BrokerController {
         }
     }
 
-    private void unregisterBrokerAll() {
-        this.brokerOuterAPI.unregisterBrokerAll(
-            this.brokerConfig.getBrokerClusterName(),
-            this.getBrokerAddr(),
-            this.brokerConfig.getBrokerName(),
-            this.brokerConfig.getBrokerId());
+    public long headSlowTimeMills4SendThreadPoolQueue() {
+        return this.headSlowTimeMills(this.sendThreadPoolQueue);
     }
 
-    public String getBrokerAddr() {
-        return this.brokerConfig.getBrokerIP1() + ":" + this.nettyServerConfig.getListenPort();
+    public long headSlowTimeMills4PullThreadPoolQueue() {
+        return this.headSlowTimeMills(this.pullThreadPoolQueue);
     }
 
-    public void start() throws Exception {
-        if (this.messageStore != null) {
-            this.messageStore.start();
-        }
-
-        if (this.remotingServer != null) {
-            this.remotingServer.start();
-        }
-
-        if (this.fastRemotingServer != null) {
-            this.fastRemotingServer.start();
-        }
-
-        if (this.fileWatchService != null) {
-            this.fileWatchService.start();
-        }
-
-        if (this.brokerOuterAPI != null) {
-            this.brokerOuterAPI.start();
-        }
-
-        if (this.pullRequestHoldService != null) {
-            this.pullRequestHoldService.start();
-        }
-
-        if (this.clientHousekeepingService != null) {
-            this.clientHousekeepingService.start();
-        }
-
-        if (this.filterServerManager != null) {
-            this.filterServerManager.start();
-        }
-
-        this.registerBrokerAll(true, false, true);
-
-        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    BrokerController.this.registerBrokerAll(true, false, brokerConfig.isForceRegister());
-                } catch (Throwable e) {
-                    log.error("registerBrokerAll Exception", e);
-                }
-            }
-        }, 1000 * 10, Math.max(10000, Math.min(brokerConfig.getRegisterNameServerPeriod(), 60000)), TimeUnit.MILLISECONDS);
-
-        if (this.brokerStatsManager != null) {
-            this.brokerStatsManager.start();
-        }
-
-        if (this.brokerFastFailure != null) {
-            this.brokerFastFailure.start();
-        }
-
-        if (BrokerRole.SLAVE != messageStoreConfig.getBrokerRole()) {
-            if (this.transactionalMessageCheckService != null) {
-                log.info("Start transaction service!");
-                this.transactionalMessageCheckService.start();
-            }
-        }
+    public long headSlowTimeMills4QueryThreadPoolQueue() {
+        return this.headSlowTimeMills(this.queryThreadPoolQueue);
     }
 
     public synchronized void registerIncrementBrokerData(TopicConfig topicConfig, DataVersion dataVersion) {
@@ -881,19 +663,169 @@ public class BrokerController {
         }
     }
 
+
+
+    //Access can be private
+    public void registerProcessor() {
+        /**
+         * SendMessageProcessor
+         */
+        SendMessageProcessor sendProcessor = new SendMessageProcessor(this);
+        sendProcessor.registerSendMessageHook(sendMessageHookList);
+        sendProcessor.registerConsumeMessageHook(consumeMessageHookList);
+
+        this.remotingServer.registerProcessor(RequestCode.SEND_MESSAGE, sendProcessor, this.sendMessageExecutor);
+        this.remotingServer.registerProcessor(RequestCode.SEND_MESSAGE_V2, sendProcessor, this.sendMessageExecutor);
+        this.remotingServer.registerProcessor(RequestCode.SEND_BATCH_MESSAGE, sendProcessor, this.sendMessageExecutor);
+        this.remotingServer.registerProcessor(RequestCode.CONSUMER_SEND_MSG_BACK, sendProcessor, this.sendMessageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.SEND_MESSAGE, sendProcessor, this.sendMessageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.SEND_MESSAGE_V2, sendProcessor, this.sendMessageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.SEND_BATCH_MESSAGE, sendProcessor, this.sendMessageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.CONSUMER_SEND_MSG_BACK, sendProcessor, this.sendMessageExecutor);
+        /**
+         * PullMessageProcessor
+         */
+        this.remotingServer.registerProcessor(RequestCode.PULL_MESSAGE, this.pullMessageProcessor, this.pullMessageExecutor);
+        this.pullMessageProcessor.registerConsumeMessageHook(consumeMessageHookList);
+
+        /**
+         * QueryMessageProcessor
+         */
+        NettyRequestProcessor queryProcessor = new QueryMessageProcessor(this);
+        this.remotingServer.registerProcessor(RequestCode.QUERY_MESSAGE, queryProcessor, this.queryMessageExecutor);
+        this.remotingServer.registerProcessor(RequestCode.VIEW_MESSAGE_BY_ID, queryProcessor, this.queryMessageExecutor);
+
+        this.fastRemotingServer.registerProcessor(RequestCode.QUERY_MESSAGE, queryProcessor, this.queryMessageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.VIEW_MESSAGE_BY_ID, queryProcessor, this.queryMessageExecutor);
+
+        /**
+         * ClientManageProcessor
+         */
+        ClientManageProcessor clientProcessor = new ClientManageProcessor(this);
+        this.remotingServer.registerProcessor(RequestCode.HEART_BEAT, clientProcessor, this.heartbeatExecutor);
+        this.remotingServer.registerProcessor(RequestCode.UNREGISTER_CLIENT, clientProcessor, this.clientManageExecutor);
+        this.remotingServer.registerProcessor(RequestCode.CHECK_CLIENT_CONFIG, clientProcessor, this.clientManageExecutor);
+
+        this.fastRemotingServer.registerProcessor(RequestCode.HEART_BEAT, clientProcessor, this.heartbeatExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.UNREGISTER_CLIENT, clientProcessor, this.clientManageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.CHECK_CLIENT_CONFIG, clientProcessor, this.clientManageExecutor);
+
+        /**
+         * ConsumerManageProcessor
+         */
+        ConsumerManageProcessor consumerManageProcessor = new ConsumerManageProcessor(this);
+        this.remotingServer.registerProcessor(RequestCode.GET_CONSUMER_LIST_BY_GROUP, consumerManageProcessor, this.consumerManageExecutor);
+        this.remotingServer.registerProcessor(RequestCode.UPDATE_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
+        this.remotingServer.registerProcessor(RequestCode.QUERY_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
+
+        this.fastRemotingServer.registerProcessor(RequestCode.GET_CONSUMER_LIST_BY_GROUP, consumerManageProcessor, this.consumerManageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.UPDATE_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.QUERY_CONSUMER_OFFSET, consumerManageProcessor, this.consumerManageExecutor);
+
+        /**
+         * EndTransactionProcessor
+         */
+        this.remotingServer.registerProcessor(RequestCode.END_TRANSACTION, new EndTransactionProcessor(this), this.endTransactionExecutor);
+        this.fastRemotingServer.registerProcessor(RequestCode.END_TRANSACTION, new EndTransactionProcessor(this), this.endTransactionExecutor);
+
+        /**
+         * Default
+         */
+        AdminBrokerProcessor adminProcessor = new AdminBrokerProcessor(this);
+        this.remotingServer.registerDefaultProcessor(adminProcessor, this.adminBrokerExecutor);
+        this.fastRemotingServer.registerDefaultProcessor(adminProcessor, this.adminBrokerExecutor);
+    }
+
+    public void protectBroker() {
+        if (this.brokerConfig.isDisableConsumeIfConsumerReadSlowly()) {
+            final Iterator<Map.Entry<String, MomentStatsItem>> it = this.brokerStatsManager.getMomentStatsItemSetFallSize().getStatsItemTable().entrySet().iterator();
+            while (it.hasNext()) {
+                final Map.Entry<String, MomentStatsItem> next = it.next();
+                final long fallBehindBytes = next.getValue().getValue().get();
+                if (fallBehindBytes > this.brokerConfig.getConsumerFallbehindThreshold()) {
+                    final String[] split = next.getValue().getStatsKey().split("@");
+                    final String group = split[2];
+                    LOG_PROTECTION.info("[PROTECT_BROKER] the consumer[{}] consume slowly, {} bytes, disable it", group, fallBehindBytes);
+                    this.subscriptionGroupManager.disableConsume(group);
+                }
+            }
+        }
+    }
+
+    public long headSlowTimeMills(BlockingQueue<Runnable> q) {
+        long slowTimeMills = 0;
+        final Runnable peek = q.peek();
+        if (peek != null) {
+            RequestTask rt = BrokerFastFailure.castRunnable(peek);
+            slowTimeMills = rt == null ? 0 : this.messageStore.now() - rt.getCreateTimestamp();
+        }
+
+        if (slowTimeMills < 0) {
+            slowTimeMills = 0;
+        }
+
+        return slowTimeMills;
+    }
+
+    public long headSlowTimeMills4EndTransactionThreadPoolQueue() {
+        return this.headSlowTimeMills(this.endTransactionThreadPoolQueue);
+    }
+
+    public void printWaterMark() {
+        LOG_WATER_MARK.info("[WATERMARK] Send Queue Size: {} SlowTimeMills: {}", this.sendThreadPoolQueue.size(), headSlowTimeMills4SendThreadPoolQueue());
+        LOG_WATER_MARK.info("[WATERMARK] Pull Queue Size: {} SlowTimeMills: {}", this.pullThreadPoolQueue.size(), headSlowTimeMills4PullThreadPoolQueue());
+        LOG_WATER_MARK.info("[WATERMARK] Query Queue Size: {} SlowTimeMills: {}", this.queryThreadPoolQueue.size(), headSlowTimeMills4QueryThreadPoolQueue());
+        LOG_WATER_MARK.info("[WATERMARK] Transaction Queue Size: {} SlowTimeMills: {}", this.endTransactionThreadPoolQueue.size(), headSlowTimeMills4EndTransactionThreadPoolQueue());
+    }
+
+
+
+
+
+    // private methods
+    private void initialTransaction() {
+        this.transactionalMessageService = ServiceProvider.loadClass(ServiceProvider.TRANSACTION_SERVICE_ID, TransactionalMessageService.class);
+        if (null == this.transactionalMessageService) {
+            this.transactionalMessageService = new TransactionalMessageServiceImpl(new TransactionalMessageBridge(this, this.getMessageStore()));
+            log.warn("Load default transaction message hook service: {}", TransactionalMessageServiceImpl.class.getSimpleName());
+        }
+        this.transactionalMessageCheckListener = ServiceProvider.loadClass(ServiceProvider.TRANSACTION_LISTENER_ID, AbstractTransactionalMessageCheckListener.class);
+        if (null == this.transactionalMessageCheckListener) {
+            this.transactionalMessageCheckListener = new DefaultTransactionalMessageCheckListener();
+            log.warn("Load default discard message hook service: {}", DefaultTransactionalMessageCheckListener.class.getSimpleName());
+        }
+        this.transactionalMessageCheckListener.setBrokerController(this);
+        this.transactionalMessageCheckService = new TransactionalMessageCheckService(this);
+    }
+
+    private void printMasterAndSlaveDiff() {
+        long diff = this.messageStore.slaveFallBehindMuch();
+
+        // XXX: warn and notify me
+        log.info("Slave fall behind master: {} bytes", diff);
+    }
+
+    private void unregisterBrokerAll() {
+        this.brokerOuterAPI.unregisterBrokerAll(
+                this.brokerConfig.getBrokerClusterName(),
+                this.getBrokerAddr(),
+                this.brokerConfig.getBrokerName(),
+                this.brokerConfig.getBrokerId());
+    }
+
     private void doRegisterBrokerAll(boolean checkOrderConfig, boolean oneway,
-        TopicConfigSerializeWrapper topicConfigWrapper) {
+                                     TopicConfigSerializeWrapper topicConfigWrapper) {
         List<RegisterBrokerResult> registerBrokerResultList = this.brokerOuterAPI.registerBrokerAll(
-            this.brokerConfig.getBrokerClusterName(),
-            this.getBrokerAddr(),
-            this.brokerConfig.getBrokerName(),
-            this.brokerConfig.getBrokerId(),
-            this.getHAServerAddr(),
-            topicConfigWrapper,
-            this.filterServerManager.buildNewFilterServerList(),
-            oneway,
-            this.brokerConfig.getRegisterBrokerTimeoutMills(),
-            this.brokerConfig.isCompressedRegister());
+                this.brokerConfig.getBrokerClusterName(),
+                this.getBrokerAddr(),
+                this.brokerConfig.getBrokerName(),
+                this.brokerConfig.getBrokerId(),
+                this.getHAServerAddr(),
+                topicConfigWrapper,
+                this.filterServerManager.buildNewFilterServerList(),
+                oneway,
+                this.brokerConfig.getRegisterBrokerTimeoutMills(),
+                this.brokerConfig.isCompressedRegister());
 
         if (registerBrokerResultList.size() > 0) {
             RegisterBrokerResult registerBrokerResult = registerBrokerResultList.get(0);
@@ -912,10 +844,10 @@ public class BrokerController {
     }
 
     private boolean needRegister(final String clusterName,
-        final String brokerAddr,
-        final String brokerName,
-        final long brokerId,
-        final int timeoutMills) {
+                                 final String brokerAddr,
+                                 final String brokerName,
+                                 final long brokerId,
+                                 final int timeoutMills) {
 
         TopicConfigSerializeWrapper topicConfigWrapper = this.getTopicConfigManager().buildTopicConfigSerializeWrapper();
         List<Boolean> changeList = brokerOuterAPI.needRegister(clusterName, brokerAddr, brokerName, brokerId, topicConfigWrapper, timeoutMills);
@@ -927,6 +859,89 @@ public class BrokerController {
             }
         }
         return needRegister;
+    }
+
+
+
+
+
+
+    //getter and setter
+
+    public BrokerConfig getBrokerConfig() {
+        return brokerConfig;
+    }
+
+    public NettyServerConfig getNettyServerConfig() {
+        return nettyServerConfig;
+    }
+
+    public BlockingQueue<Runnable> getPullThreadPoolQueue() {
+        return pullThreadPoolQueue;
+    }
+
+    public BlockingQueue<Runnable> getQueryThreadPoolQueue() {
+        return queryThreadPoolQueue;
+    }
+
+    public BrokerStats getBrokerStats() {
+        return brokerStats;
+    }
+
+    public void setBrokerStats(BrokerStats brokerStats) {
+        this.brokerStats = brokerStats;
+    }
+
+    public MessageStore getMessageStore() {
+        return messageStore;
+    }
+
+    public void setMessageStore(MessageStore messageStore) {
+        this.messageStore = messageStore;
+    }
+
+    public Broker2Client getBroker2Client() {
+        return broker2Client;
+    }
+
+    public ConsumerManager getConsumerManager() {
+        return consumerManager;
+    }
+
+    public ConsumerFilterManager getConsumerFilterManager() {
+        return consumerFilterManager;
+    }
+
+    public ConsumerOffsetManager getConsumerOffsetManager() {
+        return consumerOffsetManager;
+    }
+
+    public MessageStoreConfig getMessageStoreConfig() {
+        return messageStoreConfig;
+    }
+
+    public ProducerManager getProducerManager() {
+        return producerManager;
+    }
+
+    public void setFastRemotingServer(RemotingServer fastRemotingServer) {
+        this.fastRemotingServer = fastRemotingServer;
+    }
+
+    public PullMessageProcessor getPullMessageProcessor() {
+        return pullMessageProcessor;
+    }
+
+    public PullRequestHoldService getPullRequestHoldService() {
+        return pullRequestHoldService;
+    }
+
+    public SubscriptionGroupManager getSubscriptionGroupManager() {
+        return subscriptionGroupManager;
+    }
+
+    public String getBrokerAddr() {
+        return this.brokerConfig.getBrokerIP1() + ":" + this.nettyServerConfig.getListenPort();
     }
 
     public TopicConfigManager getTopicConfigManager() {
@@ -1028,7 +1043,7 @@ public class BrokerController {
     }
 
     public void setTransactionalMessageCheckService(
-        TransactionalMessageCheckService transactionalMessageCheckService) {
+            TransactionalMessageCheckService transactionalMessageCheckService) {
         this.transactionalMessageCheckService = transactionalMessageCheckService;
     }
 
@@ -1045,11 +1060,13 @@ public class BrokerController {
     }
 
     public void setTransactionalMessageCheckListener(
-        AbstractTransactionalMessageCheckListener transactionalMessageCheckListener) {
+            AbstractTransactionalMessageCheckListener transactionalMessageCheckListener) {
         this.transactionalMessageCheckListener = transactionalMessageCheckListener;
     }
 
     public BlockingQueue<Runnable> getEndTransactionThreadPoolQueue() {
         return endTransactionThreadPoolQueue;
     }
+
+
 }
