@@ -19,7 +19,13 @@ package org.apache.rocketmq.common.message;
 
 public enum MessageType {
     Normal_Msg,
+    Delay_Msg,
+
+    //better name maybe
+    Prepare_Msg,
+    Commit_Msg,
+
+
     Trans_Msg_Half,
     Trans_msg_Commit,
-    Delay_Msg,
 }

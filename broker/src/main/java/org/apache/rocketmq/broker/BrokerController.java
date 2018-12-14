@@ -157,6 +157,13 @@ public class BrokerController {
     private TransactionalMessageService transactionalMessageService;
     private AbstractTransactionalMessageCheckListener transactionalMessageCheckListener;
 
+    /**
+     * constructor init dependent objects
+     * @param brokerConfig
+     * @param nettyServerConfig
+     * @param nettyClientConfig
+     * @param messageStoreConfig
+     */
     public BrokerController(
         final BrokerConfig brokerConfig,
         final NettyServerConfig nettyServerConfig,
@@ -210,248 +217,248 @@ public class BrokerController {
         result = result && this.subscriptionGroupManager.load();
         result = result && this.consumerFilterManager.load();
 
-        if (result) {
-            try {
-                this.messageStore =
-                        new DefaultMessageStore(this.messageStoreConfig, this.brokerStatsManager, this.messageArrivingListener,
-                                this.brokerConfig);
-                this.brokerStats = new BrokerStats((DefaultMessageStore) this.messageStore);
-                //load plugin
-                MessageStorePluginContext context = new MessageStorePluginContext(messageStoreConfig, brokerStatsManager, messageArrivingListener, brokerConfig);
-                this.messageStore = MessageStoreFactory.build(context, this.messageStore);
-                this.messageStore.getDispatcherList().addFirst(new CommitLogDispatcherCalcBitMap(this.brokerConfig, this.consumerFilterManager));
-            } catch (IOException e) {
-                result = false;
-                log.error("Failed to initialize", e);
-            }
+        if(!result) return false;
+
+        try {
+            this.messageStore =
+                    new DefaultMessageStore(this.messageStoreConfig, this.brokerStatsManager, this.messageArrivingListener,
+                            this.brokerConfig);
+            this.brokerStats = new BrokerStats((DefaultMessageStore) this.messageStore);
+            //load plugin
+            MessageStorePluginContext context = new MessageStorePluginContext(messageStoreConfig, brokerStatsManager, messageArrivingListener, brokerConfig);
+            this.messageStore = MessageStoreFactory.build(context, this.messageStore);
+            this.messageStore.getDispatcherList().addFirst(new CommitLogDispatcherCalcBitMap(this.brokerConfig, this.consumerFilterManager));
+        } catch (IOException e) {
+            result = false;
+            log.error("Failed to initialize", e);
         }
 
         result = result && this.messageStore.load();
+        if(!result) return false;
 
-        if (result) {
-            this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.clientHousekeepingService);
-            NettyServerConfig fastConfig = (NettyServerConfig) this.nettyServerConfig.clone();
-            fastConfig.setListenPort(nettyServerConfig.getListenPort() - 2);
-            this.fastRemotingServer = new NettyRemotingServer(fastConfig, this.clientHousekeepingService);
-            this.sendMessageExecutor = new BrokerFixedThreadPoolExecutor(
-                    this.brokerConfig.getSendMessageThreadPoolNums(),
-                    this.brokerConfig.getSendMessageThreadPoolNums(),
-                    1000 * 60,
-                    TimeUnit.MILLISECONDS,
-                    this.sendThreadPoolQueue,
-                    new ThreadFactoryImpl("SendMessageThread_"));
+        this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.clientHousekeepingService);
+        NettyServerConfig fastConfig = (NettyServerConfig) this.nettyServerConfig.clone();
+        fastConfig.setListenPort(nettyServerConfig.getListenPort() - 2);
+        this.fastRemotingServer = new NettyRemotingServer(fastConfig, this.clientHousekeepingService);
+        this.sendMessageExecutor = new BrokerFixedThreadPoolExecutor(
+                this.brokerConfig.getSendMessageThreadPoolNums(),
+                this.brokerConfig.getSendMessageThreadPoolNums(),
+                1000 * 60,
+                TimeUnit.MILLISECONDS,
+                this.sendThreadPoolQueue,
+                new ThreadFactoryImpl("SendMessageThread_"));
 
-            this.pullMessageExecutor = new BrokerFixedThreadPoolExecutor(
-                    this.brokerConfig.getPullMessageThreadPoolNums(),
-                    this.brokerConfig.getPullMessageThreadPoolNums(),
-                    1000 * 60,
-                    TimeUnit.MILLISECONDS,
-                    this.pullThreadPoolQueue,
-                    new ThreadFactoryImpl("PullMessageThread_"));
+        this.pullMessageExecutor = new BrokerFixedThreadPoolExecutor(
+                this.brokerConfig.getPullMessageThreadPoolNums(),
+                this.brokerConfig.getPullMessageThreadPoolNums(),
+                1000 * 60,
+                TimeUnit.MILLISECONDS,
+                this.pullThreadPoolQueue,
+                new ThreadFactoryImpl("PullMessageThread_"));
 
-            this.queryMessageExecutor = new BrokerFixedThreadPoolExecutor(
-                    this.brokerConfig.getQueryMessageThreadPoolNums(),
-                    this.brokerConfig.getQueryMessageThreadPoolNums(),
-                    1000 * 60,
-                    TimeUnit.MILLISECONDS,
-                    this.queryThreadPoolQueue,
-                    new ThreadFactoryImpl("QueryMessageThread_"));
+        this.queryMessageExecutor = new BrokerFixedThreadPoolExecutor(
+                this.brokerConfig.getQueryMessageThreadPoolNums(),
+                this.brokerConfig.getQueryMessageThreadPoolNums(),
+                1000 * 60,
+                TimeUnit.MILLISECONDS,
+                this.queryThreadPoolQueue,
+                new ThreadFactoryImpl("QueryMessageThread_"));
 
-            this.adminBrokerExecutor =
-                    Executors.newFixedThreadPool(this.brokerConfig.getAdminBrokerThreadPoolNums(), new ThreadFactoryImpl(
-                            "AdminBrokerThread_"));
+        this.adminBrokerExecutor =
+                Executors.newFixedThreadPool(this.brokerConfig.getAdminBrokerThreadPoolNums(), new ThreadFactoryImpl(
+                        "AdminBrokerThread_"));
 
-            this.clientManageExecutor = new ThreadPoolExecutor(
-                    this.brokerConfig.getClientManageThreadPoolNums(),
-                    this.brokerConfig.getClientManageThreadPoolNums(),
-                    1000 * 60,
-                    TimeUnit.MILLISECONDS,
-                    this.clientManagerThreadPoolQueue,
-                    new ThreadFactoryImpl("ClientManageThread_"));
+        this.clientManageExecutor = new ThreadPoolExecutor(
+                this.brokerConfig.getClientManageThreadPoolNums(),
+                this.brokerConfig.getClientManageThreadPoolNums(),
+                1000 * 60,
+                TimeUnit.MILLISECONDS,
+                this.clientManagerThreadPoolQueue,
+                new ThreadFactoryImpl("ClientManageThread_"));
 
-            this.heartbeatExecutor = new BrokerFixedThreadPoolExecutor(
-                    this.brokerConfig.getHeartbeatThreadPoolNums(),
-                    this.brokerConfig.getHeartbeatThreadPoolNums(),
-                    1000 * 60,
-                    TimeUnit.MILLISECONDS,
-                    this.heartbeatThreadPoolQueue,
-                    new ThreadFactoryImpl("HeartbeatThread_", true));
+        this.heartbeatExecutor = new BrokerFixedThreadPoolExecutor(
+                this.brokerConfig.getHeartbeatThreadPoolNums(),
+                this.brokerConfig.getHeartbeatThreadPoolNums(),
+                1000 * 60,
+                TimeUnit.MILLISECONDS,
+                this.heartbeatThreadPoolQueue,
+                new ThreadFactoryImpl("HeartbeatThread_", true));
 
-            this.endTransactionExecutor = new BrokerFixedThreadPoolExecutor(
-                    this.brokerConfig.getEndTransactionThreadPoolNums(),
-                    this.brokerConfig.getEndTransactionThreadPoolNums(),
-                    1000 * 60,
-                    TimeUnit.MILLISECONDS,
-                    this.endTransactionThreadPoolQueue,
-                    new ThreadFactoryImpl("EndTransactionThread_"));
+        this.endTransactionExecutor = new BrokerFixedThreadPoolExecutor(
+                this.brokerConfig.getEndTransactionThreadPoolNums(),
+                this.brokerConfig.getEndTransactionThreadPoolNums(),
+                1000 * 60,
+                TimeUnit.MILLISECONDS,
+                this.endTransactionThreadPoolQueue,
+                new ThreadFactoryImpl("EndTransactionThread_"));
 
-            this.consumerManageExecutor =
-                    Executors.newFixedThreadPool(this.brokerConfig.getConsumerManageThreadPoolNums(), new ThreadFactoryImpl(
-                            "ConsumerManageThread_"));
+        this.consumerManageExecutor =
+                Executors.newFixedThreadPool(this.brokerConfig.getConsumerManageThreadPoolNums(), new ThreadFactoryImpl(
+                        "ConsumerManageThread_"));
 
-            this.registerProcessor();
+        this.registerProcessor();
 
-            final long initialDelay = UtilAll.computNextMorningTimeMillis() - System.currentTimeMillis();
-            final long period = 1000 * 60 * 60 * 24;
-            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        BrokerController.this.getBrokerStats().record();
-                    } catch (Throwable e) {
-                        log.error("schedule record error.", e);
-                    }
-                }
-            }, initialDelay, period, TimeUnit.MILLISECONDS);
-
-            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        BrokerController.this.consumerOffsetManager.persist();
-                    } catch (Throwable e) {
-                        log.error("schedule persist consumerOffset error.", e);
-                    }
-                }
-            }, 1000 * 10, this.brokerConfig.getFlushConsumerOffsetInterval(), TimeUnit.MILLISECONDS);
-
-            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        BrokerController.this.consumerFilterManager.persist();
-                    } catch (Throwable e) {
-                        log.error("schedule persist consumer filter error.", e);
-                    }
-                }
-            }, 1000 * 10, 1000 * 10, TimeUnit.MILLISECONDS);
-
-            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        BrokerController.this.protectBroker();
-                    } catch (Throwable e) {
-                        log.error("protectBroker error.", e);
-                    }
-                }
-            }, 3, 3, TimeUnit.MINUTES);
-
-            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        BrokerController.this.printWaterMark();
-                    } catch (Throwable e) {
-                        log.error("printWaterMark error.", e);
-                    }
-                }
-            }, 10, 1, TimeUnit.SECONDS);
-
-            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        log.info("dispatch behind commit log {} bytes", BrokerController.this.getMessageStore().dispatchBehindBytes());
-                    } catch (Throwable e) {
-                        log.error("schedule dispatchBehindBytes error.", e);
-                    }
-                }
-            }, 1000 * 10, 1000 * 60, TimeUnit.MILLISECONDS);
-
-            if (this.brokerConfig.getNamesrvAddr() != null) {
-                this.brokerOuterAPI.updateNameServerAddressList(this.brokerConfig.getNamesrvAddr());
-                log.info("Set user specified name server address: {}", this.brokerConfig.getNamesrvAddr());
-            } else if (this.brokerConfig.isFetchNamesrvAddrByAddressServer()) {
-                this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            BrokerController.this.brokerOuterAPI.fetchNameServerAddr();
-                        } catch (Throwable e) {
-                            log.error("ScheduledTask fetchNameServerAddr exception", e);
-                        }
-                    }
-                }, 1000 * 10, 1000 * 60 * 2, TimeUnit.MILLISECONDS);
-            }
-
-            if (BrokerRole.SLAVE == this.messageStoreConfig.getBrokerRole()) {
-                if (this.messageStoreConfig.getHaMasterAddress() != null && this.messageStoreConfig.getHaMasterAddress().length() >= 6) {
-                    this.messageStore.updateHaMasterAddress(this.messageStoreConfig.getHaMasterAddress());
-                    this.updateMasterHAServerAddrPeriodically = false;
-                } else {
-                    this.updateMasterHAServerAddrPeriodically = true;
-                }
-
-                this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            BrokerController.this.slaveSynchronize.syncAll();
-                        } catch (Throwable e) {
-                            log.error("ScheduledTask syncAll slave exception", e);
-                        }
-                    }
-                }, 1000 * 10, 1000 * 60, TimeUnit.MILLISECONDS);
-            } else {
-                this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            BrokerController.this.printMasterAndSlaveDiff();
-                        } catch (Throwable e) {
-                            log.error("schedule printMasterAndSlaveDiff error.", e);
-                        }
-                    }
-                }, 1000 * 10, 1000 * 60, TimeUnit.MILLISECONDS);
-            }
-
-            if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
-                // Register a listener to reload SslContext
+        final long initialDelay = UtilAll.computNextMorningTimeMillis() - System.currentTimeMillis();
+        final long period = 1000 * 60 * 60 * 24;
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+                                                      @Override
+                                                      public void run() {
                 try {
-                    fileWatchService = new FileWatchService(
-                            new String[] {
-                                    TlsSystemConfig.tlsServerCertPath,
-                                    TlsSystemConfig.tlsServerKeyPath,
-                                    TlsSystemConfig.tlsServerTrustCertPath
-                            },
-                            new FileWatchService.Listener() {
-                                boolean certChanged, keyChanged = false;
-
-                                @Override
-                                public void onChanged(String path) {
-                                    if (path.equals(TlsSystemConfig.tlsServerTrustCertPath)) {
-                                        log.info("The trust certificate changed, reload the ssl context");
-                                        reloadServerSslContext();
-                                    }
-                                    if (path.equals(TlsSystemConfig.tlsServerCertPath)) {
-                                        certChanged = true;
-                                    }
-                                    if (path.equals(TlsSystemConfig.tlsServerKeyPath)) {
-                                        keyChanged = true;
-                                    }
-                                    if (certChanged && keyChanged) {
-                                        log.info("The certificate and private key changed, reload the ssl context");
-                                        certChanged = keyChanged = false;
-                                        reloadServerSslContext();
-                                    }
-                                }
-
-                                private void reloadServerSslContext() {
-                                    ((NettyRemotingServer) remotingServer).loadSslContext();
-                                    ((NettyRemotingServer) fastRemotingServer).loadSslContext();
-                                }
-                            });
-                } catch (Exception e) {
-                    log.warn("FileWatchService created error, can't load the certificate dynamically");
+                    BrokerController.this.getBrokerStats().record();
+                } catch (Throwable e) {
+                    log.error("schedule record error.", e);
                 }
-            }
-            initialTransaction();
         }
+    }, initialDelay, period, TimeUnit.MILLISECONDS);
+
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+                                                      @Override
+                                                      public void run() {
+                try {
+                    BrokerController.this.consumerOffsetManager.persist();
+                } catch (Throwable e) {
+                    log.error("schedule persist consumerOffset error.", e);
+                }
+        }
+    }, 1000 * 10, this.brokerConfig.getFlushConsumerOffsetInterval(), TimeUnit.MILLISECONDS);
+
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+                                                      @Override
+                                                      public void run() {
+                try {
+                    BrokerController.this.consumerFilterManager.persist();
+                } catch (Throwable e) {
+                    log.error("schedule persist consumer filter error.", e);
+                }
+        }
+    }, 1000 * 10, 1000 * 10, TimeUnit.MILLISECONDS);
+
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+                                                      @Override
+                                                      public void run() {
+                try {
+                    BrokerController.this.protectBroker();
+                } catch (Throwable e) {
+                    log.error("protectBroker error.", e);
+                }
+        }
+    }, 3, 3, TimeUnit.MINUTES);
+
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+                                                      @Override
+                                                      public void run() {
+                try {
+                    BrokerController.this.printWaterMark();
+                } catch (Throwable e) {
+                    log.error("printWaterMark error.", e);
+                }
+        }
+    }, 10, 1, TimeUnit.SECONDS);
+
+        this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+
+                                                      @Override
+                                                      public void run() {
+                try {
+                    log.info("dispatch behind commit log {} bytes", BrokerController.this.getMessageStore().dispatchBehindBytes());
+                } catch (Throwable e) {
+                    log.error("schedule dispatchBehindBytes error.", e);
+                }
+        }
+    }, 1000 * 10, 1000 * 60, TimeUnit.MILLISECONDS);
+
+        if (this.brokerConfig.getNamesrvAddr() != null) {
+            this.brokerOuterAPI.updateNameServerAddressList(this.brokerConfig.getNamesrvAddr());
+            log.info("Set user specified name server address: {}", this.brokerConfig.getNamesrvAddr());
+        } else if (this.brokerConfig.isFetchNamesrvAddrByAddressServer()) {
+            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+
+                                                          @Override
+                                                          public void run() {
+                    try {
+                        BrokerController.this.brokerOuterAPI.fetchNameServerAddr();
+                    } catch (Throwable e) {
+                        log.error("ScheduledTask fetchNameServerAddr exception", e);
+                    }
+            }
+        }, 1000 * 10, 1000 * 60 * 2, TimeUnit.MILLISECONDS);
+        }
+
+        if (BrokerRole.SLAVE == this.messageStoreConfig.getBrokerRole()) {
+            if (this.messageStoreConfig.getHaMasterAddress() != null && this.messageStoreConfig.getHaMasterAddress().length() >= 6) {
+                this.messageStore.updateHaMasterAddress(this.messageStoreConfig.getHaMasterAddress());
+                this.updateMasterHAServerAddrPeriodically = false;
+            } else {
+                this.updateMasterHAServerAddrPeriodically = true;
+            }
+
+            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+
+                                                          @Override
+                                                          public void run() {
+                    try {
+                        BrokerController.this.slaveSynchronize.syncAll();
+                    } catch (Throwable e) {
+                        log.error("ScheduledTask syncAll slave exception", e);
+                    }
+            }
+        }, 1000 * 10, 1000 * 60, TimeUnit.MILLISECONDS);
+        } else {
+            this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+
+                                                          @Override
+                                                          public void run() {
+                    try {
+                        BrokerController.this.printMasterAndSlaveDiff();
+                    } catch (Throwable e) {
+                        log.error("schedule printMasterAndSlaveDiff error.", e);
+                    }
+            }
+        }, 1000 * 10, 1000 * 60, TimeUnit.MILLISECONDS);
+        }
+
+        if (TlsSystemConfig.tlsMode != TlsMode.DISABLED) {
+            // Register a listener to reload SslContext
+            try {
+                fileWatchService = new FileWatchService(
+                        new String[] {
+                                TlsSystemConfig.tlsServerCertPath,
+                                TlsSystemConfig.tlsServerKeyPath,
+                                TlsSystemConfig.tlsServerTrustCertPath
+                        },
+                        new FileWatchService.Listener() {
+                            boolean certChanged, keyChanged = false;
+
+                            @Override
+                            public void onChanged(String path) {
+                                                           if (path.equals(TlsSystemConfig.tlsServerTrustCertPath)) {
+                                                           log.info("The trust certificate changed, reload the ssl context");
+                                                           reloadServerSslContext();
+                                                           }
+                                                           if (path.equals(TlsSystemConfig.tlsServerCertPath)) {
+                                                           certChanged = true;
+                                                           }
+                                                           if (path.equals(TlsSystemConfig.tlsServerKeyPath)) {
+                                                           keyChanged = true;
+                                                           }
+                                                           if (certChanged && keyChanged) {
+                                                           log.info("The certificate and private key changed, reload the ssl context");
+                                                           certChanged = keyChanged = false;
+                                                           reloadServerSslContext();
+                                                           }
+                                                           }
+
+                            private void reloadServerSslContext() {
+                                                              ((NettyRemotingServer) remotingServer).loadSslContext();
+                                                              ((NettyRemotingServer) fastRemotingServer).loadSslContext();
+                                                              }
+                        });
+            } catch (Exception e) {
+                log.warn("FileWatchService created error, can't load the certificate dynamically");
+            }
+        }
+        initialTransaction();
+
         return result;
     }
 
@@ -786,7 +793,8 @@ public class BrokerController {
     private void initialTransaction() {
         this.transactionalMessageService = ServiceProvider.loadClass(ServiceProvider.TRANSACTION_SERVICE_ID, TransactionalMessageService.class);
         if (null == this.transactionalMessageService) {
-            this.transactionalMessageService = new TransactionalMessageServiceImpl(new TransactionalMessageBridge(this, this.getMessageStore()));
+            this.transactionalMessageService = new TransactionalMessageServiceImpl(
+                    new TransactionalMessageBridge(this, this.getMessageStore()));
             log.warn("Load default transaction message hook service: {}", TransactionalMessageServiceImpl.class.getSimpleName());
         }
         this.transactionalMessageCheckListener = ServiceProvider.loadClass(ServiceProvider.TRANSACTION_LISTENER_ID, AbstractTransactionalMessageCheckListener.class);

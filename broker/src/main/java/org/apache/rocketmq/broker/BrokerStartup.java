@@ -106,6 +106,7 @@ public class BrokerStartup {
         }
 
         try {
+            //config init
             //PackageConflictDetect.detectFastjson();
             Options options = ServerUtil.buildCommandlineOptions(new Options());
             commandLine = ServerUtil.parseCmdLine("mqbroker", args, buildCommandlineOptions(options),
@@ -218,6 +219,10 @@ public class BrokerStartup {
             MixAll.printObjectProperties(log, nettyClientConfig);
             MixAll.printObjectProperties(log, messageStoreConfig);
 
+
+
+
+            // init controller
             final BrokerController controller = new BrokerController(
                 brokerConfig,
                 nettyServerConfig,
