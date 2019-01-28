@@ -580,6 +580,9 @@ public class MappedFileQueue {
         }
     }
 
+
+
+    // getter and setter
     public long getFlushedWhere() {
         return flushedWhere;
     }
